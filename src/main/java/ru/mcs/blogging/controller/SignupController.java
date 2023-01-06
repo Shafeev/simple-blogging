@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import ru.mcs.blogging.model.BlogUser;
+import ru.mcs.blogging.models.BlogUser;
 
 @Controller
 @SessionAttributes("blogUser")

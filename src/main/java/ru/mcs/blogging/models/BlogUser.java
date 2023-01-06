@@ -1,8 +1,8 @@
-package ru.mcs.blogging.model;
+package ru.mcs.blogging.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,21 +11,26 @@ import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 
 @Data
-@EntityScan
+@Entity
 @Table(name = "users")
 @SequenceGenerator(name = "user_seq_gen", sequenceName = "user_seq", initialValue = 10, allocationSize = 1)
 public class BlogUser implements UserDetails {
+
+    private static final int MIN_USERNAME_LENGTH = 3;
+    private static final int MIN_PASSWORD_LENGTH = 8;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
     @Column(name = "id")
     private Long id;
 
+    @Length(min = MIN_USERNAME_LENGTH, message = "Username must be at least " + MIN_USERNAME_LENGTH + " characters long")
     @NotEmpty(message = "Please enter username")
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @JsonIgnore
+    @JsonIgnore // just in case Jackson tries wants to betray us
+    @Length(min = MIN_PASSWORD_LENGTH, message = "Password must be at least " + MIN_PASSWORD_LENGTH + " characters long")
     @NotEmpty(message = "Please enter the password")
     @Column(name = "password", nullable = false)
     private String password;
@@ -36,10 +41,10 @@ public class BlogUser implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Collection<Post> posts;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return null;
+//    }
 
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
@@ -47,6 +52,7 @@ public class BlogUser implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "authority_id")
     )
+    private Collection<Authority> authorities;
 
     @Override
     public boolean isAccountNonExpired() {
@@ -74,7 +80,8 @@ public class BlogUser implements UserDetails {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", posts=" + posts +
+//                ", posts=" + posts +
+//                ", authorities=" + authorities +
                 '}';
     }
 }
